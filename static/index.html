@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎵 PLAYER CLUB | Telegram Music Player</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        /* Полный стиль PLAYER CLUB */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, sans-serif; 
+            background: linear-gradient(135deg, #0c2461, #1e3799);
+            color: #ffffff;
+            overflow-x: hidden;
+            height: 100vh;
+        }
+        
+        /* Интерфейс PLAYER CLUB */
+        .player-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            max-width: 1000px;
+            margin: 0 auto;
+            background: rgba(0, 0, 0, 0.85);
+            border-radius: 0;
+            box-shadow: 0 0 50px rgba(0, 87, 255, 0.3);
+        }
+        
+        /* Шапка PLAYER CLUB */
+        .player-header {
+            background: linear-gradient(90deg, #001f3f, #003366);
+            padding: 15px 25px;
+            border-bottom: 3px solid #0059ff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .logo i { 
+            color: #00ff88; 
+            font-size: 28px;
+            text-shadow: 0 0 10px #00ff88;
+        }
+        .logo span { 
+            font-size: 24px; 
+            font-weight: 700; 
+            color: #ffffff;
+            letter-spacing: 1px;
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+        }
+        .logo-subtitle {
+            font-size: 12px;
+            color: #88ddff;
+            margin-top: -5px;
+        }
+        
+        /* Основное окно */
+        .main-window {
+            flex-grow: 1;
+            padding: 25px;
+            overflow-y: auto;
+            background: rgba(10, 25, 47, 0.9);
+        }
+        
+        /* Панель плеера */
+        .player-panel {
+            background: rgba(0, 31, 63, 0.8);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 2px solid #0059ff;
+            box-shadow: 0 0 20px rgba(0, 89, 255, 0.2);
+        }
+        .track-info { 
+            margin-bottom: 25px;
+            text-align: center;
+        }
+        .track-title { 
+            font-size: 22px; 
+            color: #00ff88; 
+            margin-bottom: 8px;
+            font-weight: 700;
+            text-shadow: 0 0 5px #00ff88;
+        }
+        .track-artist { 
+            font-size: 16px; 
+            color: #88ddff;
+        }
+        
+        /* Прогресс бар PLAYER CLUB стиль */
+        .progress-area { 
+            margin: 30px 0;
+            background: rgba(0, 40, 85, 0.6);
+            padding: 15px;
+            border-radius: 10px;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            cursor: pointer;
+            overflow: hidden;
+            border: 1px solid rgba(0, 89, 255, 0.3);
+        }
+        #progress {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #00ff88, #0059ff);
+            border-radius: 4px;
+            transition: width 0.1s linear;
+            box-shadow: 0 0 10px #00ff88;
+        }
+        .time-area {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            color: #88ddff;
+            margin-top: 10px;
+            font-weight: 500;
+        }
+        
+        /* Кнопки управления PLAYER CLUB */
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            margin: 30px 0;
+        }
+        .ctrl-btn {
+            background: linear-gradient(145deg, #00264d, #001a33);
+            border: 2px solid #0059ff;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            color: #ffffff;
+            font-size: 22px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 89, 255, 0.3);
+        }
+        .ctrl-btn:hover {
+            background: linear-gradient(145deg, #0059ff, #003399);
+            color: white;
+            transform: scale(1.1);
+            box-shadow: 0 0 20px #0059ff;
+            border-color: #00ff88;
+        }
+        .ctrl-btn.main {
+            width: 80px;
+            height: 80px;
+            font-size: 30px;
+            background: linear-gradient(145deg, #0059ff, #00ff88);
+            border: 3px solid #ffffff;
+        }
+        .ctrl-btn.main:hover {
+            background: linear-gradient(145deg, #00ff88, #0059ff);
+            box-shadow: 0 0 30px #00ff88;
+        }
+        
+        /* Плейлист PLAYER CLUB */
+        .playlist-section {
+            background: rgba(0, 31, 63, 0.8);
+            border-radius: 12px;
+            padding: 20px;
+            border: 2px solid #0059ff;
+            max-height: 400px;
+            overflow-y: auto;
+            box-shadow: 0 0 20px rgba(0, 89, 255, 0.2);
+        }
+        .playlist-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #0059ff;
+        }
+        .playlist-header h3 {
+            color: #00ff88;
+            font-size: 18px;
+            font-weight: 700;
+        }
+        .track-counter {
+            background: #0059ff;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .playlist {
+            list-style: none;
+        }
+        .playlist-item {
+            padding: 15px 20px;
+            border-bottom: 1px solid rgba(0, 89, 255, 0.3);
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+        .playlist-item:hover {
+            background: rgba(0, 89, 255, 0.2);
+            transform: translateX(5px);
+        }
+        .playlist-item.active {
+            background: linear-gradient(90deg, rgba(0, 89, 255, 0.3), rgba(0, 255, 136, 0.2));
+            border-left: 5px solid #00ff88;
+        }
+        .item-icon { 
+            color: #00ff88; 
+            font-size: 20px;
+        }
+        .item-info { 
+            flex-grow: 1;
+        }
+        .item-title { 
+            font-weight: 600;
+            color: #ffffff;
+        }
+        .item-artist {
+            color: #88ddff;
+            font-size: 14px;
+        }
+        .item-duration { 
+            color: #00ff88; 
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        /* Нижняя панель PLAYER CLUB */
+        .bottom-panel {
+            background: linear-gradient(90deg, #001f3f, #003366);
+            padding: 18px 25px;
+            border-top: 3px solid #0059ff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .volume-area {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            width: 250px;
+        }
+        .volume-icon {
+            color: #00ff88;
+            font-size: 22px;
+        }
+        .volume-slider {
+            flex-grow: 1;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            cursor: pointer;
+            position: relative;
+            border: 1px solid rgba(0, 89, 255, 0.3);
+        }
+        #volume-level {
+            position: absolute;
+            height: 100%;
+            width: 80%;
+            background: linear-gradient(90deg, #00ff88, #0059ff);
+            border-radius: 4px;
+            box-shadow: 0 0 5px #00ff88;
+        }
+        .status {
+            background: rgba(0, 89, 255, 0.3);
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            color: #88ddff;
+            border: 1px solid #0059ff;
+        }
+        
+        /* Скроллбар */
+        .playlist-section::-webkit-scrollbar { width: 10px; }
+        .playlist-section::-webkit-scrollbar-track { background: rgba(0, 40, 85, 0.5); }
+        .playlist-section::-webkit-scrollbar-thumb { 
+            background: linear-gradient(180deg, #0059ff, #00ff88); 
+            border-radius: 5px; 
+        }
+        
+        /* Адаптивность для Telegram */
+        @media (max-width: 768px) {
+            .controls { gap: 15px; }
+            .ctrl-btn { width: 50px; height: 50px; }
+            .ctrl-btn.main { width: 65px; height: 65px; }
+            .player-panel { padding: 20px; }
+            .logo span { font-size: 20px; }
+        }
+        
+        /* Анимации */
+        @keyframes glow {
+            0% { text-shadow: 0 0 5px #00ff88; }
+            50% { text-shadow: 0 0 15px #00ff88; }
+            100% { text-shadow: 0 0 5px #00ff88; }
+        }
+        .logo span {
+            animation: glow 2s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="player-container">
+        <!-- Шапка PLAYER CLUB -->
+        <div class="player-header">
+            <div class="logo">
+                <i class="fas fa-crown"></i>
+                <div>
+                    <span>PLAYER CLUB</span>
+                    <div class="logo-subtitle">PREMIUM MUSIC EXPERIENCE</div>
+                </div>
+            </div>
+            <div style="color: #88ddff; font-size: 13px;">v 2.0</div>
+        </div>
+        
+        <!-- Основное окно -->
+        <div class="main-window">
+            <!-- Информация о треке -->
+            <div class="player-panel">
+                <div class="track-info">
+                    <div class="track-title" id="current-track-title">Welcome to Player Club</div>
+                    <div class="track-artist" id="current-track-artist">Select a track to begin</div>
+                </div>
+                
+                <div class="progress-area">
+                    <div class="progress-bar" id="progress-bar">
+                        <div id="progress"></div>
+                    </div>
+                    <div class="time-area">
+                        <span id="current-time">0:00</span>
+                        <span id="track-duration">0:00</span>
+                    </div>
+                </div>
+                
+                <!-- Кнопки управления PLAYER CLUB -->
+                <div class="controls">
+                    <button class="ctrl-btn" title="Предыдущий" onclick="prevTrack()">
+                        <i class="fas fa-step-backward"></i>
+                    </button>
+                    <button class="ctrl-btn main" title="Воспроизвести/Пауза" onclick="togglePlay()">
+                        <i class="fas fa-play" id="play-icon"></i>
+                    </button>
+                    <button class="ctrl-btn" title="Следующий" onclick="nextTrack()">
+                        <i class="fas fa-step-forward"></i>
+                    </button>
+                    <button class="ctrl-btn" title="Повтор" onclick="toggleRepeat()">
+                        <i class="fas fa-redo" id="repeat-icon"></i>
+                    </button>
+                    <button class="ctrl-btn" title="Случайный" onclick="toggleShuffle()">
+                        <i class="fas fa-random" id="shuffle-icon"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Плейлист -->
+            <div class="playlist-section">
+                <div class="playlist-header">
+                    <h3><i class="fas fa-list-music"></i> CLUB PLAYLIST</h3>
+                    <div class="track-counter" id="track-counter">Loading...</div>
+                </div>
+                <ul class="playlist" id="playlist">
+                    <!-- Плейлист загрузится автоматически -->
+                    <div style="text-align: center; padding: 40px; color: #88ddff;">
+                        <i class="fas fa-compact-disc fa-spin" style="font-size: 40px; margin-bottom: 15px;"></i>
+                        <div>Loading Player Club playlist...</div>
+                        <div style="font-size: 12px; margin-top: 10px; color: #88aaff;">
+                            Add music to your Telegram channel to see it here
+                        </div>
+                    </div>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Нижняя панель -->
+        <div class="bottom-panel">
+            <div class="volume-area">
+                <i class="fas fa-volume-high volume-icon"></i>
+                <div class="volume-slider" id="volume-slider">
+                    <div id="volume-level"></div>
+                </div>
+            </div>
+            <div class="status" id="status">
+                <i class="fas fa-satellite-dish"></i> READY
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ========== НАСТРОЙКИ PLAYER CLUB ==========
+        const PLAYLIST_URL = '/playlist';  // ⬅️ ИСПРАВЛЕННАЯ СТРОКА!
+        const AUTO_UPDATE = 30000; // 30 секунд
+        // ============================================
+
+        let playlist = [];
+        let currentTrackIndex = 0;
+        let isPlaying = false;
+        let isRepeat = false;
+        let isShuffle = false;
+        const audio = new Audio();
+        let updateInterval;
+
+        // Инициализация Telegram Web App
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.ready();
+
+        // Загрузка плейлиста
+        async function loadPlaylist() {
+            try {
+                document.getElementById('status').innerHTML = '<i class="fas fa-sync fa-spin"></i> UPDATING';
+                const response = await fetch(PLAYLIST_URL + '?t=' + Date.now());
+                
+                if (!response.ok) throw new Error('Ошибка загрузки');
+                
+                const data = await response.json();
+                if (data.success && JSON.stringify(data.tracks) !== JSON.stringify(playlist)) {
+                    playlist = data.tracks;
+                    renderPlaylist();
+                    updateTrackCounter();
+                    
+                    if (playlist.length > 0 && currentTrackIndex === 0) {
+                        loadTrack(0);
+                    }
+                }
+                
+                document.getElementById('status').innerHTML = '<i class="fas fa-check"></i> UPDATED';
+                setTimeout(() => {
+                    document.getElementById('status').innerHTML = '<i class="fas fa-satellite-dish"></i> ONLINE';
+                }, 2000);
+            } catch (error) {
+                console.error('Ошибка загрузки:', error);
+                document.getElementById('status').innerHTML = '<i class="fas fa-exclamation-triangle"></i> ERROR';
+            }
+        }
+
+        // Отображение плейлиста
+        function renderPlaylist() {
+            const playlistEl = document.getElementById('playlist');
+            if (!playlist.length) {
+                playlistEl.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #88ddff;">
+                        <i class="fas fa-music-slash" style="font-size: 40px; margin-bottom: 15px;"></i>
+                        <div>No tracks in playlist</div>
+                        <div style="font-size: 12px; margin-top: 10px; color: #88aaff;">
+                            Add music to your Telegram channel to see it here
+                        </div>
+                    </div>`;
+                return;
+            }
+            
+            playlistEl.innerHTML = playlist.map((track, index) => `
+                <li class="playlist-item ${index === currentTrackIndex ? 'active' : ''}" 
+                    onclick="playTrack(${index})">
+                    <i class="fas fa-music item-icon"></i>
+                    <div class="item-info">
+                        <div class="item-title">${track.title || 'Unknown Track'}</div>
+                        <div class="item-artist">${track.artist || 'Unknown Artist'}</div>
+                    </div>
+                    <div class="item-duration">${formatTime(track.duration || 0)}</div>
+                </li>
+            `).join('');
+        }
+
+        // Загрузка трека
+        function loadTrack(index) {
+            if (!playlist.length) return;
+            
+            currentTrackIndex = index;
+            const track = playlist[index];
+            
+            audio.src = track.url;
+            document.getElementById('current-track-title').textContent = track.title || 'Unknown Track';
+            document.getElementById('current-track-artist').textContent = track.artist || 'Unknown Artist';
+            
+            // Обновляем активный элемент
+            document.querySelectorAll('.playlist-item').forEach((item, i) => {
+                item.classList.toggle('active', i === index);
+            });
+            
+            if (isPlaying) {
+                audio.play();
+            }
+        }
+
+        // Управление воспроизведением
+        function togglePlay() {
+            if (!playlist.length) {
+                alert('Add music to your Telegram channel first!');
+                return;
+            }
+            
+            if (isPlaying) {
+                audio.pause();
+                document.getElementById('play-icon').className = 'fas fa-play';
+                document.getElementById('status').innerHTML = '<i class="fas fa-pause"></i> PAUSED';
+            } else {
+                audio.play();
+                document.getElementById('play-icon').className = 'fas fa-pause';
+                document.getElementById('status').innerHTML = '<i class="fas fa-play"></i> PLAYING';
+            }
+            isPlaying = !isPlaying;
+        }
+
+        function prevTrack() {
+            if (!playlist.length) return;
+            let newIndex = currentTrackIndex - 1;
+            if (newIndex < 0) newIndex = playlist.length - 1;
+            loadTrack(newIndex);
+            if (isPlaying) audio.play();
+        }
+
+        function nextTrack() {
+            if (!playlist.length) return;
+            let newIndex = currentTrackIndex + 1;
+            if (newIndex >= playlist.length) newIndex = 0;
+            loadTrack(newIndex);
+            if (isPlaying) audio.play();
+        }
+
+        function playTrack(index) {
+            loadTrack(index);
+            if (!isPlaying) {
+                isPlaying = true;
+                audio.play();
+                document.getElementById('play-icon').className = 'fas fa-pause';
+                document.getElementById('status').innerHTML = '<i class="fas fa-play"></i> PLAYING';
+            }
+        }
+
+        function toggleRepeat() {
+            isRepeat = !isRepeat;
+            document.getElementById('repeat-icon').style.color = isRepeat ? '#00ff88' : '#ffffff';
+            document.getElementById('repeat-icon').style.textShadow = isRepeat ? '0 0 10px #00ff88' : 'none';
+            audio.loop = isRepeat;
+            document.getElementById('status').innerHTML = isRepeat ? 
+                '<i class="fas fa-redo"></i> REPEAT ON' : 
+                '<i class="fas fa-satellite-dish"></i> ONLINE';
+        }
+
+        function toggleShuffle() {
+            isShuffle = !isShuffle;
+            document.getElementById('shuffle-icon').style.color = isShuffle ? '#00ff88' : '#ffffff';
+            document.getElementById('shuffle-icon').style.textShadow = isShuffle ? '0 0 10px #00ff88' : 'none';
+            document.getElementById('status').innerHTML = isShuffle ? 
+                '<i class="fas fa-random"></i> SHUFFLE ON' : 
+                '<i class="fas fa-satellite-dish"></i> ONLINE';
+        }
+
+        // Прогресс бар
+        document.getElementById('progress-bar').addEventListener('click', (e) => {
+            if (!audio.duration) return;
+            const rect = e.currentTarget.getBoundingClientRect();
+            const percent = (e.clientX - rect.left) / rect.width;
+            audio.currentTime = percent * audio.duration;
+        });
+
+        audio.addEventListener('timeupdate', () => {
+            if (audio.duration) {
+                const percent = (audio.currentTime / audio.duration) * 100;
+                document.getElementById('progress').style.width = `${percent}%`;
+                document.getElementById('current-time').textContent = formatTime(audio.currentTime);
+                document.getElementById('track-duration').textContent = formatTime(audio.duration);
+            }
+        });
+
+        // Громкость
+        document.getElementById('volume-slider').addEventListener('click', (e) => {
+            const rect = e.currentTarget.getBoundingClientRect();
+            const percent = (e.clientX - rect.left) / rect.width;
+            const volume = Math.max(0, Math.min(1, percent));
+            audio.volume = volume;
+            document.getElementById('volume-level').style.width = `${volume * 100}%`;
+            document.getElementById('status').innerHTML = `<i class="fas fa-volume-high"></i> VOL ${Math.round(volume * 100)}%`;
+            
+            setTimeout(() => {
+                document.getElementById('status').innerHTML = '<i class="fas fa-satellite-dish"></i> ONLINE';
+            }, 1500);
+        });
+
+        // Вспомогательные функции
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+        }
+
+        function updateTrackCounter() {
+            document.getElementById('track-counter').textContent = `${playlist.length} TRACKS`;
+        }
+
+        // Автообновление
+        function startAutoUpdate() {
+            loadPlaylist();
+            setInterval(loadPlaylist, AUTO_UPDATE);
+        }
+
+        // Запуск PLAYER CLUB
+        document.addEventListener('DOMContentLoaded', () => {
+            // Начальные настройки
+            audio.volume = 0.8;
+            document.getElementById('volume-level').style.width = '80%';
+            
+            // Запускаем автообновление
+            startAutoUpdate();
+            
+            // Обработчик конца трека
+            audio.addEventListener('ended', () => {
+                if (isRepeat) return;
+                if (isShuffle) {
+                    playTrack(Math.floor(Math.random() * playlist.length));
+                } else {
+                    nextTrack();
+                }
+            });
+            
+            // Приветственное сообщение
+            setTimeout(() => {
+                if (playlist.length === 0) {
+                    document.getElementById('current-track-title').textContent = 'PLAYER CLUB';
+                    document.getElementById('current-track-artist').textContent = 'Premium Music Experience';
+                }
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
