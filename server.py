@@ -12,7 +12,7 @@ app = Flask(__name__)
 API_ID = '37818079'
 API_HASH = '1568fa6df3d7ddb1b26f758dc96cfce8'
 BOT_TOKEN = '8003441506:AAHg2z317ew9KZn3Jo60T__f740BcnZaJmU'
-CHANNEL_ID = -1001378493465  # Отрицательное число!
+CHANNEL_ID = -1001378493465  
 # =================================
 
 playlist_file = 'playlist.json'
